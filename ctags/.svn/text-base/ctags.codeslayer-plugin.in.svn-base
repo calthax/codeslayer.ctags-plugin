@@ -1,8 +1,0 @@
-[plugin]
-lib=libctagscodeslayerplugin
-version=@PACKAGE_VERSION@
-name=Ctags
-description=A plugin to search the source files using the ctags.
-authors=Jeff Johnston <jeff.johnston.mn@gmail.com>
-copyright=Copyright © 2011 Jeff Johnston
-website=http://codeslayer.org
