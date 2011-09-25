@@ -1,0 +1,83 @@
+K 25
+svn:wc:ra_dav:version-url
+V 36
+/svn/!svn/ver/1400/plugins/ctags/src
+END
+ctags-project-properties.c
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/1140/plugins/ctags/src/ctags-project-properties.c
+END
+readtags.h
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/svn/!svn/ver/977/plugins/ctags/src/readtags.h
+END
+Makefile.in
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/!svn/ver/1390/plugins/ctags/src/Makefile.in
+END
+ctags-menu.c
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/!svn/ver/1131/plugins/ctags/src/ctags-menu.c
+END
+ctags-engine.c
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/!svn/ver/1400/plugins/ctags/src/ctags-engine.c
+END
+ctags-project-properties.h
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/1140/plugins/ctags/src/ctags-project-properties.h
+END
+ctags-configuration.c
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/!svn/ver/1123/plugins/ctags/src/ctags-configuration.c
+END
+ctags-menu.h
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/!svn/ver/1131/plugins/ctags/src/ctags-menu.h
+END
+Makefile.am
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/!svn/ver/1390/plugins/ctags/src/Makefile.am
+END
+ctags-engine.h
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/!svn/ver/1123/plugins/ctags/src/ctags-engine.h
+END
+readtags.c
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/svn/!svn/ver/977/plugins/ctags/src/readtags.c
+END
+ctags-configuration.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/!svn/ver/1123/plugins/ctags/src/ctags-configuration.h
+END
+ctags-plugin.c
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/!svn/ver/1123/plugins/ctags/src/ctags-plugin.c
+END

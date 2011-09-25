@@ -1,0 +1,119 @@
+K 25
+svn:wc:ra_dav:version-url
+V 32
+/svn/!svn/ver/1400/plugins/ctags
+END
+configure
+K 25
+svn:wc:ra_dav:version-url
+V 42
+/svn/!svn/ver/1398/plugins/ctags/configure
+END
+Makefile.in
+K 25
+svn:wc:ra_dav:version-url
+V 44
+/svn/!svn/ver/1352/plugins/ctags/Makefile.in
+END
+AUTHORS
+K 25
+svn:wc:ra_dav:version-url
+V 39
+/svn/!svn/ver/977/plugins/ctags/AUTHORS
+END
+depcomp
+K 25
+svn:wc:ra_dav:version-url
+V 39
+/svn/!svn/ver/977/plugins/ctags/depcomp
+END
+ChangeLog
+K 25
+svn:wc:ra_dav:version-url
+V 42
+/svn/!svn/ver/1184/plugins/ctags/ChangeLog
+END
+compile
+K 25
+svn:wc:ra_dav:version-url
+V 39
+/svn/!svn/ver/977/plugins/ctags/compile
+END
+config.guess
+K 25
+svn:wc:ra_dav:version-url
+V 44
+/svn/!svn/ver/977/plugins/ctags/config.guess
+END
+ctags.codeslayer-plugin.in
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/1375/plugins/ctags/ctags.codeslayer-plugin.in
+END
+config.sub
+K 25
+svn:wc:ra_dav:version-url
+V 42
+/svn/!svn/ver/977/plugins/ctags/config.sub
+END
+README
+K 25
+svn:wc:ra_dav:version-url
+V 39
+/svn/!svn/ver/1184/plugins/ctags/README
+END
+ltmain.sh
+K 25
+svn:wc:ra_dav:version-url
+V 41
+/svn/!svn/ver/977/plugins/ctags/ltmain.sh
+END
+configure.ac
+K 25
+svn:wc:ra_dav:version-url
+V 45
+/svn/!svn/ver/1396/plugins/ctags/configure.ac
+END
+INSTALL
+K 25
+svn:wc:ra_dav:version-url
+V 39
+/svn/!svn/ver/977/plugins/ctags/INSTALL
+END
+COPYING
+K 25
+svn:wc:ra_dav:version-url
+V 39
+/svn/!svn/ver/977/plugins/ctags/COPYING
+END
+missing
+K 25
+svn:wc:ra_dav:version-url
+V 39
+/svn/!svn/ver/977/plugins/ctags/missing
+END
+Makefile.am
+K 25
+svn:wc:ra_dav:version-url
+V 44
+/svn/!svn/ver/1352/plugins/ctags/Makefile.am
+END
+NEWS
+K 25
+svn:wc:ra_dav:version-url
+V 37
+/svn/!svn/ver/1184/plugins/ctags/NEWS
+END
+aclocal.m4
+K 25
+svn:wc:ra_dav:version-url
+V 43
+/svn/!svn/ver/1065/plugins/ctags/aclocal.m4
+END
+install-sh
+K 25
+svn:wc:ra_dav:version-url
+V 42
+/svn/!svn/ver/977/plugins/ctags/install-sh
+END
