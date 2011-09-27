@@ -69,7 +69,7 @@ ctags_menu_new (GtkAccelGroup *accel_group)
   menu = g_object_new (ctags_menu_get_type (), NULL);
   
   gtk_widget_add_accelerator (menu, "activate", 
-                              accel_group, GDK_J, 
+                              accel_group, GDK_KEY_J, 
                               GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
 
   g_signal_connect_swapped (G_OBJECT (menu), "activate", 
