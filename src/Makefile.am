@@ -7,10 +7,6 @@ lib_LTLIBRARIES = libctagscodeslayerplugin.la
 
 libctagscodeslayerplugin_la_SOURCES = \
     ctags-plugin.c \
-    ctags-configuration.c \
-    ctags-configuration.h \
-    ctags-project-properties.c \
-    ctags-project-properties.h \
     ctags-engine.c \
     ctags-engine.h \
     ctags-menu.c \

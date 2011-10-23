@@ -18,7 +18,6 @@
 
 #include <codeslayer/codeslayer.h>
 #include "ctags-menu.h"
-#include "ctags-project-properties.h"
 #include "ctags-engine.h"
 #include <gtk/gtk.h>
 #include <glib.h>
@@ -28,7 +27,6 @@ G_MODULE_EXPORT void activate   (CodeSlayer *codeslayer);
 G_MODULE_EXPORT void deactivate (CodeSlayer *codeslayer);
 
 static GtkWidget *menu;
-static GtkWidget *project_properties;
 static CtagsEngine *engine;
 
 G_MODULE_EXPORT
@@ -37,19 +35,13 @@ void activate (CodeSlayer *codeslayer)
   GtkAccelGroup *accel_group;
   accel_group = codeslayer_get_menubar_accel_group (codeslayer);
   menu = ctags_menu_new (accel_group);
-
-  project_properties = ctags_project_properties_new ();
-  engine = ctags_engine_new (codeslayer, menu, project_properties);
-  ctags_engine_load_configurations (engine);
-
+  engine = ctags_engine_new (codeslayer, menu);
   codeslayer_add_to_menubar (codeslayer, GTK_MENU_ITEM (menu));
-  codeslayer_add_to_project_properties (codeslayer, project_properties, "Ctags");
 }
 
 G_MODULE_EXPORT
 void deactivate (CodeSlayer *codeslayer)
 {
   codeslayer_remove_from_menubar (codeslayer, GTK_MENU_ITEM (menu));
-  codeslayer_remove_from_project_properties (codeslayer, project_properties);
   g_object_unref (engine);
 }

@@ -72,8 +72,6 @@ LTLIBRARIES = $(lib_LTLIBRARIES)
 libctagscodeslayerplugin_la_LIBADD =
 am_libctagscodeslayerplugin_la_OBJECTS =  \
 	libctagscodeslayerplugin_la-ctags-plugin.lo \
-	libctagscodeslayerplugin_la-ctags-configuration.lo \
-	libctagscodeslayerplugin_la-ctags-project-properties.lo \
 	libctagscodeslayerplugin_la-ctags-engine.lo \
 	libctagscodeslayerplugin_la-ctags-menu.lo \
 	libctagscodeslayerplugin_la-readtags.lo
@@ -225,10 +223,6 @@ INCLUDES = \
 lib_LTLIBRARIES = libctagscodeslayerplugin.la
 libctagscodeslayerplugin_la_SOURCES = \
     ctags-plugin.c \
-    ctags-configuration.c \
-    ctags-configuration.h \
-    ctags-project-properties.c \
-    ctags-project-properties.h \
     ctags-engine.c \
     ctags-engine.h \
     ctags-menu.c \
@@ -311,11 +305,9 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libctagscodeslayerplugin_la-ctags-configuration.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libctagscodeslayerplugin_la-ctags-engine.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libctagscodeslayerplugin_la-ctags-menu.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libctagscodeslayerplugin_la-ctags-plugin.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libctagscodeslayerplugin_la-ctags-project-properties.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libctagscodeslayerplugin_la-readtags.Plo@am__quote@
 
 .c.o:
@@ -345,20 +337,6 @@ libctagscodeslayerplugin_la-ctags-plugin.lo: ctags-plugin.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ctags-plugin.c' object='libctagscodeslayerplugin_la-ctags-plugin.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libctagscodeslayerplugin_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libctagscodeslayerplugin_la-ctags-plugin.lo `test -f 'ctags-plugin.c' || echo '$(srcdir)/'`ctags-plugin.c
-
-libctagscodeslayerplugin_la-ctags-configuration.lo: ctags-configuration.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libctagscodeslayerplugin_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libctagscodeslayerplugin_la-ctags-configuration.lo -MD -MP -MF $(DEPDIR)/libctagscodeslayerplugin_la-ctags-configuration.Tpo -c -o libctagscodeslayerplugin_la-ctags-configuration.lo `test -f 'ctags-configuration.c' || echo '$(srcdir)/'`ctags-configuration.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libctagscodeslayerplugin_la-ctags-configuration.Tpo $(DEPDIR)/libctagscodeslayerplugin_la-ctags-configuration.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ctags-configuration.c' object='libctagscodeslayerplugin_la-ctags-configuration.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libctagscodeslayerplugin_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libctagscodeslayerplugin_la-ctags-configuration.lo `test -f 'ctags-configuration.c' || echo '$(srcdir)/'`ctags-configuration.c
-
-libctagscodeslayerplugin_la-ctags-project-properties.lo: ctags-project-properties.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libctagscodeslayerplugin_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libctagscodeslayerplugin_la-ctags-project-properties.lo -MD -MP -MF $(DEPDIR)/libctagscodeslayerplugin_la-ctags-project-properties.Tpo -c -o libctagscodeslayerplugin_la-ctags-project-properties.lo `test -f 'ctags-project-properties.c' || echo '$(srcdir)/'`ctags-project-properties.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libctagscodeslayerplugin_la-ctags-project-properties.Tpo $(DEPDIR)/libctagscodeslayerplugin_la-ctags-project-properties.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ctags-project-properties.c' object='libctagscodeslayerplugin_la-ctags-project-properties.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libctagscodeslayerplugin_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libctagscodeslayerplugin_la-ctags-project-properties.lo `test -f 'ctags-project-properties.c' || echo '$(srcdir)/'`ctags-project-properties.c
 
 libctagscodeslayerplugin_la-ctags-engine.lo: ctags-engine.c
 @am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libctagscodeslayerplugin_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libctagscodeslayerplugin_la-ctags-engine.lo -MD -MP -MF $(DEPDIR)/libctagscodeslayerplugin_la-ctags-engine.Tpo -c -o libctagscodeslayerplugin_la-ctags-engine.lo `test -f 'ctags-engine.c' || echo '$(srcdir)/'`ctags-engine.c

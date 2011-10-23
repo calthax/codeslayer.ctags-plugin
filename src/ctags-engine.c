@@ -18,8 +18,6 @@
 
 #include <codeslayer/codeslayer-utils.h>
 #include "ctags-engine.h"
-#include "ctags-configuration.h"
-#include "ctags-project-properties.h"
 #include "readtags.h"
 
 typedef struct
@@ -33,14 +31,6 @@ static void ctags_engine_class_init                          (CtagsEngineClass  
 static void ctags_engine_init                                (CtagsEngine        *engine);
 static void ctags_engine_finalize                            (CtagsEngine        *engine);
 
-static CtagsConfiguration* get_configuration_by_project_key  (CtagsEngine        *engine, 
-                                                              const gchar        *project_key);
-static void project_properties_opened_action                 (CtagsEngine        *engine,
-                                                              CodeSlayerProject  *project);
-static void project_properties_saved_action                  (CtagsEngine        *engine,
-                                                              CodeSlayerProject  *project);                                                                        
-static void save_configuration_action                        (CtagsEngine        *engine,
-                                                              CtagsConfiguration *configuration);
 static void find_tag_action                                  (CodeSlayer         *codeslayer);
 static void editor_saved_action                              (CtagsEngine        *engine, 
                                                               CodeSlayerEditor   *editor);
@@ -59,7 +49,6 @@ static gboolean search_projects                              (CodeSlayer        
                                                               gboolean            search_headers);
 static void select_editor                                    (CodeSlayer         *codeslayer, 
                                                               Tag                *tag);                                                              
-static gchar* get_configuration_file_path                    (CtagsEngine        *engine);
                                                    
 #define CTAGS_ENGINE_GET_PRIVATE(obj) \
   (G_TYPE_INSTANCE_GET_PRIVATE ((obj), CTAGS_ENGINE_TYPE, CtagsEnginePrivate))
@@ -70,10 +59,6 @@ struct _CtagsEnginePrivate
 {
   CodeSlayer *codeslayer;
   GtkWidget  *menu;
-  GtkWidget  *project_properties;
-  GList      *configurations;
-  gulong      properties_opened_id;
-  gulong      properties_saved_id;
   gulong      saved_handler_id;
   guint       event_source_id;
 };
@@ -89,36 +74,17 @@ ctags_engine_class_init (CtagsEngineClass *klass)
 }
 
 static void
-ctags_engine_init (CtagsEngine *engine) 
-{
-  CtagsEnginePrivate *priv;
-  priv = CTAGS_ENGINE_GET_PRIVATE (engine);
-  priv->configurations = NULL;
-}
+ctags_engine_init (CtagsEngine *engine) {}
 
 static void
 ctags_engine_finalize (CtagsEngine *engine)
 {
-  CtagsEnginePrivate *priv;
-  priv = CTAGS_ENGINE_GET_PRIVATE (engine);
-  if (priv->configurations != NULL)
-    {
-      g_list_foreach (priv->configurations, (GFunc) g_object_unref, NULL);
-      g_list_free (priv->configurations);
-      priv->configurations = NULL;    
-    }
-    
-  g_signal_handler_disconnect (priv->codeslayer, priv->properties_opened_id);
-  g_signal_handler_disconnect (priv->codeslayer, priv->properties_saved_id);
-  g_signal_handler_disconnect (priv->codeslayer, priv->saved_handler_id);
-  
   G_OBJECT_CLASS (ctags_engine_parent_class)->finalize (G_OBJECT(engine));
 }
 
 CtagsEngine*
 ctags_engine_new (CodeSlayer *codeslayer,
-                  GtkWidget  *menu, 
-                  GtkWidget  *project_properties)
+                  GtkWidget  *menu)
 {
   CtagsEnginePrivate *priv;
   CtagsEngine *engine;
@@ -128,198 +94,30 @@ ctags_engine_new (CodeSlayer *codeslayer,
 
   priv->codeslayer = codeslayer;
   priv->menu = menu;
-  priv->project_properties = project_properties;
   priv->event_source_id = 0;
+  
+  priv->saved_handler_id = g_signal_connect_swapped (G_OBJECT (codeslayer), "editor-saved", 
+                                                     G_CALLBACK (editor_saved_action), engine);  
   
   g_signal_connect_swapped (G_OBJECT (menu), "find-tag",
                             G_CALLBACK (find_tag_action), codeslayer);
 
-  priv->properties_opened_id =  g_signal_connect_swapped (G_OBJECT (codeslayer), "project-properties-opened",
-                                                          G_CALLBACK (project_properties_opened_action), engine);
-
-  priv->properties_saved_id = g_signal_connect_swapped (G_OBJECT (codeslayer), "project-properties-saved",
-                                                        G_CALLBACK (project_properties_saved_action), engine);
-
-  priv->saved_handler_id = g_signal_connect_swapped (G_OBJECT (codeslayer), "editor-saved", 
-                                                     G_CALLBACK (editor_saved_action), engine);
-
-  g_signal_connect_swapped (G_OBJECT (project_properties), "save-configuration",
-                            G_CALLBACK (save_configuration_action), engine);
-
   return engine;
-}
-
-void 
-ctags_engine_load_configurations (CtagsEngine *engine)
-{
-  CtagsEnginePrivate *priv;
-  GList *configurations;
-  gchar *file_path;
-
-  priv = CTAGS_ENGINE_GET_PRIVATE (engine);
-  
-  file_path = get_configuration_file_path (engine);
-  configurations = codeslayer_utils_get_gobjects (CTAGS_CONFIGURATION_TYPE,
-                                                  FALSE,
-                                                  file_path, 
-                                                  "ctag",
-                                                  "project_key", G_TYPE_STRING,
-                                                  "source_directory", G_TYPE_STRING, 
-                                                  NULL);
-  priv->configurations = configurations;
-  g_free (file_path);
-}
-
-static CtagsConfiguration*
-get_configuration_by_project_key (CtagsEngine *engine, 
-                                  const gchar *project_key)
-{
-  CtagsEnginePrivate *priv;
-  GList *list;
-
-  priv = CTAGS_ENGINE_GET_PRIVATE (engine);
-
-  list = priv->configurations;
-  while (list != NULL)
-    {
-      CtagsConfiguration *configuration = list->data;
-      const gchar *key;
-      
-      key = ctags_configuration_get_project_key (configuration);
-      
-      if (g_strcmp0 (project_key, key) == 0)
-        return configuration;
-
-      list = g_list_next (list);
-    }
-
-  return NULL;
-}
-
-static void
-project_properties_opened_action (CtagsEngine       *engine,
-                                  CodeSlayerProject *project)
-{
-  CtagsEnginePrivate *priv;
-  const gchar *project_key;
-  CtagsConfiguration *configuration;
-  
-  priv = CTAGS_ENGINE_GET_PRIVATE (engine);
-
-  project_key = codeslayer_project_get_key (project);
-  configuration = get_configuration_by_project_key (engine, project_key);
-  
-  ctags_project_properties_opened (CTAGS_PROJECT_PROPERTIES (priv->project_properties),
-                                   configuration, project);
-}
-
-static void
-project_properties_saved_action (CtagsEngine       *engine,
-                                 CodeSlayerProject *project)
-{
-  CtagsEnginePrivate *priv;
-  const gchar *project_key;
-  CtagsConfiguration *configuration;
-  
-  priv = CTAGS_ENGINE_GET_PRIVATE (engine);
-
-  project_key = codeslayer_project_get_key (project);
-  configuration = get_configuration_by_project_key (engine, project_key);
-  
-  ctags_project_properties_saved (CTAGS_PROJECT_PROPERTIES (priv->project_properties),
-                                  configuration, project);
-}
-
-static void
-save_configuration_action (CtagsEngine        *engine,
-                           CtagsConfiguration *configuration)
-{
-  CtagsEnginePrivate *priv;
-  GList *list;
-  GList *tmp;
-  gchar *file_path;
-
-  priv = CTAGS_ENGINE_GET_PRIVATE (engine);
-  
-  if (configuration)
-    priv->configurations = g_list_prepend (priv->configurations, configuration);
-    
-  list = g_list_copy (priv->configurations);
-  tmp = list;
-  
-  while (tmp != NULL)
-    {
-      CtagsConfiguration *configuration = tmp->data;
-      const gchar *source_directory;
-      source_directory = ctags_configuration_get_source_directory (configuration);
-      if (g_utf8_strlen (source_directory, -1) == 0)
-        priv->configurations = g_list_remove (priv->configurations, configuration);
-      tmp = g_list_next (tmp);
-    }
-    
-  g_list_free (list);    
-
-  file_path = get_configuration_file_path (engine);  
-  codeslayer_utils_save_gobjects (priv->configurations,
-                                  file_path, 
-                                  "ctag",
-                                  "project_key", G_TYPE_STRING,
-                                  "source_directory", G_TYPE_STRING, 
-                                  NULL);  
-  g_free (file_path);
-  
-  execute_create_tags (engine);
-}
-
-static gchar*
-get_configuration_file_path (CtagsEngine *engine)
-{
-  CtagsEnginePrivate *priv;
-  gchar *folder_path;
-  gchar *file_path;
-  
-  priv = CTAGS_ENGINE_GET_PRIVATE (engine);
-
-  folder_path = codeslayer_get_active_group_folder_path (priv->codeslayer);  
-  file_path = g_build_filename (folder_path, "ctags.xml", NULL);
-  g_free (folder_path);
-  
-  return file_path;
 }
 
 static void 
 editor_saved_action (CtagsEngine      *engine, 
                      CodeSlayerEditor *editor) 
 {
-  CtagsEnginePrivate *priv;
   CodeSlayerDocument *document;
   CodeSlayerProject *project;
-  GList *list;
-  const gchar *project_key;
-  gboolean found;
-
-  priv = CTAGS_ENGINE_GET_PRIVATE (engine);
+  const gchar *source_folders_path;
 
   document = codeslayer_editor_get_document (editor);
   project = codeslayer_document_get_project (document);
-  project_key = codeslayer_project_get_key (project);
-  found = FALSE;
+  source_folders_path = codeslayer_project_get_source_folders_path (project);
   
-  list = priv->configurations;
-  while (list != NULL)
-    {
-      CtagsConfiguration *configuration = list->data;
-      const gchar *key;
-      
-      key = ctags_configuration_get_project_key (configuration);
-      
-      if (g_strcmp0 (project_key, key) == 0)
-        found = TRUE;
-
-      list = g_list_next (list);
-    }
-
-  if (found)
+  if (codeslayer_utils_has_text (source_folders_path))
     execute_create_tags (engine);
 }
 
@@ -347,28 +145,39 @@ start_create_tags (CtagsEngine *engine)
 {
   CtagsEnginePrivate *priv;
   FILE *file;
-  GList *list;
+  CodeSlayerGroup *group;
+  gchar *group_folder_path;
+  GList *projects;
   GString *string;
   gchar *command;
-  gchar *group_file_path;
 
   priv = CTAGS_ENGINE_GET_PRIVATE (engine);
   
-  group_file_path = codeslayer_get_active_group_file_path (priv->codeslayer);
+  group = codeslayer_get_active_group (priv->codeslayer);
+  group_folder_path = codeslayer_get_active_group_folder_path (priv->codeslayer);
+  
+  projects = codeslayer_group_get_projects (group);
   
   string = g_string_new ("cd ");
-  string = g_string_append (string, group_file_path);
+  string = g_string_append (string, group_folder_path);
   string = g_string_append (string, ";ctags -R --fields=n");
   
-  list = priv->configurations;
-  while (list != NULL)
+  while (projects != NULL)
     {
-      CtagsConfiguration *configuration = list->data;
-      const gchar *source_directory;
-      source_directory = ctags_configuration_get_source_directory (configuration);
-      string = g_string_append (string, " ");
-      string = g_string_append (string, source_directory);
-      list = g_list_next (list);
+      CodeSlayerProject *project = projects->data;
+      const gchar *source_folders_path;
+      source_folders_path = codeslayer_project_get_source_folders_path (project);
+      
+      if (codeslayer_utils_has_text (source_folders_path))
+        {
+          gchar *source_folders_replace;
+          source_folders_replace = codeslayer_utils_strreplace (source_folders_path, ",", " ");
+          string = g_string_append (string, " ");
+          string = g_string_append (string, source_folders_replace);
+          g_free (source_folders_replace);
+        }
+      
+      projects = g_list_next (projects);
     }
 
   command = g_string_free (string, FALSE);
@@ -378,7 +187,7 @@ start_create_tags (CtagsEngine *engine)
     pclose (file);
   
   g_free (command);
-  g_free (group_file_path);
+  g_free (group_folder_path);
   
   return FALSE;  
 }
@@ -401,11 +210,11 @@ find_tags (CodeSlayer        *codeslayer,
 	tagFileInfo info;
 	tagFile *tag_file;
 	tagEntry entry;
-	gchar *group_file_path;
+	gchar *group_folder_path;
 	gchar *tag_file_path;
 	
-  group_file_path = codeslayer_get_active_group_file_path (codeslayer);
-  tag_file_path = g_build_filename (group_file_path, "tags", NULL);
+  group_folder_path = codeslayer_get_active_group_folder_path (codeslayer);
+  tag_file_path = g_build_filename (group_folder_path, "tags", NULL);
 	tag_file = tagsOpen (tag_file_path, &info);
 
 	if (tag_file == NULL)
@@ -429,7 +238,7 @@ find_tags (CodeSlayer        *codeslayer,
     
   tagsClose (tag_file);
   
-  g_free (group_file_path);
+  g_free (group_folder_path);
   g_free (tag_file_path);
   
   return results;
