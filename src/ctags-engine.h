@@ -46,7 +46,8 @@ struct _CtagsEngineClass
 GType ctags_engine_get_type (void) G_GNUC_CONST;
 
 CtagsEngine*  ctags_engine_new                  (CodeSlayer *codeslayer,
-                                                 GtkWidget  *menu);
+                                                 GtkWidget  *menu,
+                                                 GtkWidget  *project_properties);
                                  
 void          ctags_engine_load_configurations  (CtagsEngine *engine);                             
 
