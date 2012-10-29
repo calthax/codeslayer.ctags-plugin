@@ -6,6 +6,7 @@ AC_ARG_ENABLE(codeslayer-dev,
     [  --enable-codeslayer-dev  work out of the development directory],
     [AC_SUBST(CODESLAYER_HOME, ".codeslayer-dev")], [AC_SUBST(CODESLAYER_HOME, ".codeslayer")])
 
+m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES([yes])])
 AC_CONFIG_MACRO_DIR([m4])
 
 #Initialize libtool
