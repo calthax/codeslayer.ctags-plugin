@@ -113,7 +113,7 @@ add_form (CtagsProjectProperties *project_properties)
   gtk_grid_attach_next_to (GTK_GRID (grid), source_directory_entry, source_directory_label, 
                            GTK_POS_RIGHT, 1, 1);
                       
-  gtk_box_pack_start (GTK_BOX (project_properties), grid, FALSE, FALSE, 2);
+  gtk_box_pack_start (GTK_BOX (project_properties), grid, FALSE, FALSE, 3);
   
   g_signal_connect (G_OBJECT (source_directory_entry), "icon-press",
                     G_CALLBACK (source_directory_icon_action), project_properties);
