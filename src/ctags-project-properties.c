@@ -90,29 +90,30 @@ static void
 add_form (CtagsProjectProperties *project_properties)
 {
   CtagsProjectPropertiesPrivate *priv;
-  GtkWidget *table;
+  GtkWidget *grid;
 
   GtkWidget *source_directory_label;
   GtkWidget *source_directory_entry;
 
   priv = CTAGS_PROJECT_PROPERTIES_GET_PRIVATE (project_properties);
 
-  table = gtk_table_new (1, 2, FALSE);
+  grid = gtk_grid_new ();
+  gtk_grid_set_row_spacing (GTK_GRID (grid), 2);
 
   source_directory_label = gtk_label_new ("Source Directory:");
   gtk_misc_set_alignment (GTK_MISC (source_directory_label), 1, .5);
-  gtk_table_attach (GTK_TABLE (table), source_directory_label, 
-                    0, 1, 0, 1, GTK_FILL, GTK_SHRINK, 4, 0);
+  gtk_misc_set_padding (GTK_MISC (source_directory_label), 4, 0);
+  gtk_grid_attach (GTK_GRID (grid), source_directory_label, 0, 0, 1, 1);
   
   source_directory_entry = gtk_entry_new ();
   priv->source_directory_entry = source_directory_entry;
   gtk_entry_set_width_chars (GTK_ENTRY (source_directory_entry), 50);
   gtk_entry_set_icon_from_stock (GTK_ENTRY (source_directory_entry), 
                                  GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_DIRECTORY);
-  gtk_table_attach (GTK_TABLE (table), source_directory_entry, 1, 2, 0, 1,
-                    GTK_FILL | GTK_EXPAND | GTK_SHRINK, GTK_FILL, 4, 1);
+  gtk_grid_attach_next_to (GTK_GRID (grid), source_directory_entry, source_directory_label, 
+                           GTK_POS_RIGHT, 1, 1);
                       
-  gtk_box_pack_start (GTK_BOX (project_properties), table, FALSE, FALSE, 2);
+  gtk_box_pack_start (GTK_BOX (project_properties), grid, FALSE, FALSE, 2);
   
   g_signal_connect (G_OBJECT (source_directory_entry), "icon-press",
                     G_CALLBACK (source_directory_icon_action), project_properties);
