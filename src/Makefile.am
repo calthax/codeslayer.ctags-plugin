@@ -1,8 +1,3 @@
-INCLUDES = \
-    $(CTAGSCODESLAYERPLUGIN_CFLAGS) \
-    -I$(top_srcdir) \
-    -I$(srcdir)
-
 lib_LTLIBRARIES = libctagscodeslayerplugin.la
 
 libctagscodeslayerplugin_la_SOURCES = \
@@ -18,4 +13,4 @@ libctagscodeslayerplugin_la_SOURCES = \
     readtags.c \
     readtags.h
 
-libctagscodeslayerplugin_la_CPPFLAGS = -I$(top_srcdir)
+libctagscodeslayerplugin_la_CPPFLAGS = $(CTAGSCODESLAYERPLUGIN_CFLAGS) -I$(top_srcdir) -I$(srcdir)

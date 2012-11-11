@@ -271,11 +271,6 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-INCLUDES = \
-    $(CTAGSCODESLAYERPLUGIN_CFLAGS) \
-    -I$(top_srcdir) \
-    -I$(srcdir)
-
 lib_LTLIBRARIES = libctagscodeslayerplugin.la
 libctagscodeslayerplugin_la_SOURCES = \
     ctags-plugin.c \
@@ -290,7 +285,7 @@ libctagscodeslayerplugin_la_SOURCES = \
     readtags.c \
     readtags.h
 
-libctagscodeslayerplugin_la_CPPFLAGS = -I$(top_srcdir)
+libctagscodeslayerplugin_la_CPPFLAGS = $(CTAGSCODESLAYERPLUGIN_CFLAGS) -I$(top_srcdir) -I$(srcdir)
 all: all-am
 
 .SUFFIXES:
