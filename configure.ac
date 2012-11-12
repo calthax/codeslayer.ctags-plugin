@@ -1,5 +1,5 @@
 AC_PREREQ(2.59)
-AC_INIT([CtagsCodeSlayerPlugin], [2.0.0], [jeff.johnston.mn@gmail.com])
+AC_INIT([CtagsCodeSlayerPlugin], [2.1.0], [jeff.johnston.mn@gmail.com])
 AM_INIT_AUTOMAKE
 
 AC_ARG_ENABLE(codeslayer-dev,
@@ -19,7 +19,7 @@ AC_PROG_INSTALL
 AM_PROG_CC_C_O
 
 # Dependencies
-GTK_REQUIRED_VERSION=3.0.0
+GTK_REQUIRED_VERSION=3.6.0
 
 AC_SUBST(GTK_REQUIRED_VERSION)
 
@@ -27,7 +27,7 @@ PKG_CHECK_MODULES(CTAGSCODESLAYERPLUGIN, [
     glib-2.0 >= 2.28.0
     gtk+-3.0 >= $GTK_REQUIRED_VERSION
     gtksourceview-3.0 >= 3.0.0
-    codeslayer >= 2.0.0
+    codeslayer >= 2.1.0
 ])
 
 AC_CONFIG_FILES([
