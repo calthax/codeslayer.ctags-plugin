@@ -30,7 +30,7 @@ typedef struct
 
 
 #define MAIN "main"
-#define SOURCE_DIRECTORY "source_folder"
+#define SOURCE_FOLDER "source_folder"
 #define CTAGS_CONF "ctags.conf"
 
 static void ctags_engine_class_init           (CtagsEngineClass   *klass);
@@ -166,15 +166,7 @@ get_config_by_project (CtagsEngine       *engine,
     }
 
   keyfile = codeslayer_utils_get_keyfile (file_path);
-  source_folder = g_key_file_get_string (keyfile, MAIN, SOURCE_DIRECTORY, NULL);
-  
-  if (source_folder == NULL)
-    {
-      g_free (folder_path);
-      g_free (file_path);
-      g_key_file_free (keyfile);
-      return NULL;
-    }
+  source_folder = g_key_file_get_string (keyfile, MAIN, SOURCE_FOLDER, NULL);
   
   config = ctags_config_new ();
   ctags_config_set_project (config, project);
@@ -182,6 +174,7 @@ get_config_by_project (CtagsEngine       *engine,
   
   g_free (folder_path);
   g_free (file_path);
+  g_free (source_folder);
   g_key_file_free (keyfile);
   
   return config;
@@ -234,12 +227,12 @@ save_config_action (CtagsEngine *engine,
   keyfile = codeslayer_utils_get_keyfile (file_path);
 
   source_folder = ctags_config_get_source_folder (config);
-  g_key_file_set_string (keyfile, MAIN, SOURCE_DIRECTORY, source_folder);
+  g_key_file_set_string (keyfile, MAIN, SOURCE_FOLDER, source_folder);
 
   codeslayer_utils_save_keyfile (keyfile, file_path);  
-  g_free (file_path);
-  
   g_key_file_free (keyfile);
+  g_free (folder_path);
+  g_free (file_path);
   
   execute_create_tags (engine);
 }
