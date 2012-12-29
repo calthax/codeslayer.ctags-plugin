@@ -40,10 +40,9 @@ void activate (CodeSlayer *codeslayer)
 
   project_properties = ctags_project_properties_new ();
   engine = ctags_engine_new (codeslayer, menu, project_properties);
-  ctags_engine_load_configurations (engine);
 
   codeslayer_add_to_menubar (codeslayer, GTK_MENU_ITEM (menu));
-  codeslayer_add_to_project_properties (codeslayer, project_properties, "Ctags");
+  codeslayer_add_to_project_properties (codeslayer, project_properties, _("Ctags"));
 }
 
 G_MODULE_EXPORT

@@ -24,7 +24,7 @@ static void ctags_project_properties_finalize    (CtagsProjectProperties      *p
 
 static void add_form                             (CtagsProjectProperties      *project_properties);
 
-static void source_directory_icon_action         (GtkEntry                    *source_directory_entry, 
+static void source_folder_icon_action            (GtkEntry                    *source_folder_entry, 
                                                   GtkEntryIconPosition         icon_pos, 
                                                   GdkEvent                    *event,
                                                   CtagsProjectProperties      *project_properties);
@@ -38,7 +38,7 @@ typedef struct _CtagsProjectPropertiesPrivate CtagsProjectPropertiesPrivate;
 struct _CtagsProjectPropertiesPrivate
 {
   CodeSlayerProject *project;
-  GtkWidget         *source_directory_entry;
+  GtkWidget         *source_folder_entry;
 };
 
 enum
@@ -57,12 +57,12 @@ ctags_project_properties_class_init (CtagsProjectPropertiesClass *klass)
   GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
 
   ctags_project_properties_signals[SAVE_CONFIGURATION] =
-    g_signal_new ("save-configuration", 
+    g_signal_new ("save-config", 
                   G_TYPE_FROM_CLASS (klass),
                   G_SIGNAL_RUN_LAST | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
-                  G_STRUCT_OFFSET (CtagsProjectPropertiesClass, save_configuration), 
+                  G_STRUCT_OFFSET (CtagsProjectPropertiesClass, save_config), 
                   NULL, NULL,
-                  g_cclosure_marshal_VOID__OBJECT, G_TYPE_NONE, 1, CTAGS_CONFIGURATION_TYPE);
+                  g_cclosure_marshal_VOID__OBJECT, G_TYPE_NONE, 1, CTAGS_CONFIG_TYPE);
 
   gobject_class->finalize = (GObjectFinalizeFunc) ctags_project_properties_finalize;
   g_type_class_add_private (klass, sizeof (CtagsProjectPropertiesPrivate));
@@ -92,38 +92,38 @@ add_form (CtagsProjectProperties *project_properties)
   CtagsProjectPropertiesPrivate *priv;
   GtkWidget *grid;
 
-  GtkWidget *source_directory_label;
-  GtkWidget *source_directory_entry;
+  GtkWidget *source_folder_label;
+  GtkWidget *source_folder_entry;
 
   priv = CTAGS_PROJECT_PROPERTIES_GET_PRIVATE (project_properties);
 
   grid = gtk_grid_new ();
   gtk_grid_set_row_spacing (GTK_GRID (grid), 2);
 
-  source_directory_label = gtk_label_new ("Source Directory:");
-  gtk_misc_set_alignment (GTK_MISC (source_directory_label), 1, .5);
-  gtk_misc_set_padding (GTK_MISC (source_directory_label), 4, 0);
-  gtk_grid_attach (GTK_GRID (grid), source_directory_label, 0, 0, 1, 1);
+  source_folder_label = gtk_label_new ("Source Folder:");
+  gtk_misc_set_alignment (GTK_MISC (source_folder_label), 1, .5);
+  gtk_misc_set_padding (GTK_MISC (source_folder_label), 4, 0);
+  gtk_grid_attach (GTK_GRID (grid), source_folder_label, 0, 0, 1, 1);
   
-  source_directory_entry = gtk_entry_new ();
-  priv->source_directory_entry = source_directory_entry;
-  gtk_entry_set_width_chars (GTK_ENTRY (source_directory_entry), 50);
-  gtk_entry_set_icon_from_stock (GTK_ENTRY (source_directory_entry), 
+  source_folder_entry = gtk_entry_new ();
+  priv->source_folder_entry = source_folder_entry;
+  gtk_entry_set_width_chars (GTK_ENTRY (source_folder_entry), 50);
+  gtk_entry_set_icon_from_stock (GTK_ENTRY (source_folder_entry), 
                                  GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_DIRECTORY);
-  gtk_grid_attach_next_to (GTK_GRID (grid), source_directory_entry, source_directory_label, 
+  gtk_grid_attach_next_to (GTK_GRID (grid), source_folder_entry, source_folder_label, 
                            GTK_POS_RIGHT, 1, 1);
                       
   gtk_box_pack_start (GTK_BOX (project_properties), grid, FALSE, FALSE, 3);
   
-  g_signal_connect (G_OBJECT (source_directory_entry), "icon-press",
-                    G_CALLBACK (source_directory_icon_action), project_properties);
+  g_signal_connect (G_OBJECT (source_folder_entry), "icon-press",
+                    G_CALLBACK (source_folder_icon_action), project_properties);
 }
 
 static void 
-source_directory_icon_action (GtkEntry               *source_directory_entry, 
-                              GtkEntryIconPosition    icon_pos, 
-                              GdkEvent               *event,
-                              CtagsProjectProperties *project_properties)
+source_folder_icon_action (GtkEntry               *source_folder_entry, 
+                           GtkEntryIconPosition    icon_pos, 
+                           GdkEvent               *event,
+                           CtagsProjectProperties *project_properties)
 {
   CtagsProjectPropertiesPrivate *priv;
   GtkWidget *dialog;
@@ -153,7 +153,7 @@ source_directory_icon_action (GtkEntry               *source_directory_entry,
       char *file_path;
       file = gtk_file_chooser_get_file (GTK_FILE_CHOOSER (dialog));
       file_path = g_file_get_path (file);
-      gtk_entry_set_text (source_directory_entry, file_path);
+      gtk_entry_set_text (source_folder_entry, file_path);
       g_free (file_path);
       g_object_unref (file);
     }
@@ -164,7 +164,7 @@ source_directory_icon_action (GtkEntry               *source_directory_entry,
 
 void 
 ctags_project_properties_opened (CtagsProjectProperties *project_properties,
-                                 CtagsConfiguration     *configuration, 
+                                 CtagsConfig            *config, 
                                  CodeSlayerProject      *project)
 {
   CtagsProjectPropertiesPrivate *priv;
@@ -172,56 +172,55 @@ ctags_project_properties_opened (CtagsProjectProperties *project_properties,
   priv = CTAGS_PROJECT_PROPERTIES_GET_PRIVATE (project_properties);
   priv->project = project;
   
-  if (configuration)
+  if (config != NULL)
     {
-      const gchar *source_directory;
-    
-      source_directory = ctags_configuration_get_source_directory (configuration);
-
-      gtk_entry_set_text (GTK_ENTRY (priv->source_directory_entry), source_directory);
+      const gchar *source_folder;    
+      source_folder = ctags_config_get_source_folder (config);
+      if (source_folder != NULL)
+        gtk_entry_set_text (GTK_ENTRY (priv->source_folder_entry), source_folder);
     }
   else
     {
-      gtk_entry_set_text (GTK_ENTRY (priv->source_directory_entry), "");
+      gtk_entry_set_text (GTK_ENTRY (priv->source_folder_entry), "");
     }
 }
 
 void 
 ctags_project_properties_saved (CtagsProjectProperties *project_properties,
-                                CtagsConfiguration     *configuration,
+                                CtagsConfig            *config,
                                 CodeSlayerProject      *project)
 {
   CtagsProjectPropertiesPrivate *priv;
-  gchar *source_directory;
+  gchar *source_folder;
   
   priv = CTAGS_PROJECT_PROPERTIES_GET_PRIVATE (project_properties);
   
-  source_directory = g_strdup (gtk_entry_get_text (GTK_ENTRY (priv->source_directory_entry)));
-  g_strstrip (source_directory);
+  source_folder = g_strdup (gtk_entry_get_text (GTK_ENTRY (priv->source_folder_entry)));
+  g_strstrip (source_folder);
   
-  if (configuration)
+  if (config != NULL)
     {
-      if (g_strcmp0 (source_directory, ctags_configuration_get_source_directory (configuration)) == 0)
+      if (g_strcmp0 (source_folder, ctags_config_get_source_folder (config)) == 0)
         {
-          g_free (source_directory);
+          g_free (source_folder);
           return;
         }
         
-      ctags_configuration_set_source_directory (configuration, source_directory);
-      g_signal_emit_by_name((gpointer)project_properties, "save-configuration", NULL);        
+      ctags_config_set_source_folder (config, source_folder);
+      ctags_config_set_project (config, project);
+      g_signal_emit_by_name((gpointer)project_properties, "save-config", config);        
     }
-  else if (entry_has_text (priv->source_directory_entry))
+  else if (entry_has_text (priv->source_folder_entry))
     {
-      CtagsConfiguration *configuration;
-      const gchar *project_key;
-      configuration = ctags_configuration_new ();
-      project_key = codeslayer_project_get_key (project);
-      ctags_configuration_set_project_key (configuration, project_key);
-      ctags_configuration_set_source_directory (configuration, source_directory);
-      g_signal_emit_by_name((gpointer)project_properties, "save-configuration", configuration);        
+      CtagsConfig *config;
+      config = ctags_config_new ();
+      ctags_config_set_source_folder (config, source_folder);
+      ctags_config_set_project (config, project);
+      g_signal_emit_by_name((gpointer)project_properties, "save-config", config);
+      g_object_unref (config);      
     }
     
-  g_free (source_directory);
+  g_free (source_folder);
 }
 
 static gboolean

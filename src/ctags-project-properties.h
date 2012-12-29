@@ -21,7 +21,7 @@
 
 #include <gtk/gtk.h>
 #include <codeslayer/codeslayer.h>
-#include "ctags-configuration.h"
+#include "ctags-config.h"
 
 G_BEGIN_DECLS
 
@@ -43,7 +43,7 @@ struct _CtagsProjectPropertiesClass
 {
   GtkVBoxClass parent_class;
   
-  void (*save_configuration) (CtagsProjectProperties *project_properties);  
+  void (*save_config) (CtagsProjectProperties *project_properties);  
 };
 
 GType ctags_project_properties_get_type (void) G_GNUC_CONST;
@@ -51,11 +51,11 @@ GType ctags_project_properties_get_type (void) G_GNUC_CONST;
 GtkWidget*  ctags_project_properties_new     (void);
 
 void        ctags_project_properties_opened  (CtagsProjectProperties *project_properties,
-                                              CtagsConfiguration     *configuration, 
+                                              CtagsConfig            *config, 
                                               CodeSlayerProject      *project);
 
 void        ctags_project_properties_saved   (CtagsProjectProperties *project_properties,
-                                              CtagsConfiguration     *configuration, 
+                                              CtagsConfig            *config, 
                                               CodeSlayerProject      *project);
 
 G_END_DECLS
