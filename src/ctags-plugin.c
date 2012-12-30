@@ -35,20 +35,20 @@ G_MODULE_EXPORT
 void activate (CodeSlayer *codeslayer)
 {
   GtkAccelGroup *accel_group;
-  accel_group = codeslayer_get_menubar_accel_group (codeslayer);
+  accel_group = codeslayer_get_menu_bar_accel_group (codeslayer);
   menu = ctags_menu_new (accel_group);
 
   project_properties = ctags_project_properties_new ();
   engine = ctags_engine_new (codeslayer, menu, project_properties);
 
-  codeslayer_add_to_menubar (codeslayer, GTK_MENU_ITEM (menu));
+  codeslayer_add_to_menu_bar (codeslayer, GTK_MENU_ITEM (menu));
   codeslayer_add_to_project_properties (codeslayer, project_properties, _("Ctags"));
 }
 
 G_MODULE_EXPORT
 void deactivate (CodeSlayer *codeslayer)
 {
-  codeslayer_remove_from_menubar (codeslayer, GTK_MENU_ITEM (menu));
+  codeslayer_remove_from_menu_bar (codeslayer, GTK_MENU_ITEM (menu));
   codeslayer_remove_from_project_properties (codeslayer, project_properties);
   g_object_unref (engine);
 }
