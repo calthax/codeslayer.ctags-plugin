@@ -471,18 +471,6 @@ static void
 select_editor (CodeSlayer *codeslayer, 
                Tag        *tag)
 {
-  CodeSlayerDocument *document;
-  CodeSlayerProject *project;
-
-  document = codeslayer_document_new ();
-  project = codeslayer_get_project_by_file_path (codeslayer, tag->file_path);
-
-  codeslayer_document_set_file_path (document, tag->file_path);
-  codeslayer_document_set_line_number (document, tag->line_number);
-  codeslayer_document_set_project (document, project);
-
-  codeslayer_select_editor (codeslayer, document);
-  
-  g_object_unref (document);
+  codeslayer_select_editor_by_file_path (codeslayer, tag->file_path, tag->line_number);
 }
 
