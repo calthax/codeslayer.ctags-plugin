@@ -471,6 +471,9 @@ static void
 select_editor (CodeSlayer *codeslayer, 
                Tag        *tag)
 {
+  CodeSlayerEditor *editor;
   codeslayer_select_editor_by_file_path (codeslayer, tag->file_path, tag->line_number);
+  editor = codeslayer_get_active_editor (codeslayer);
+  g_signal_emit_by_name((gpointer) codeslayer, "editor-navigated", editor);
 }
 
