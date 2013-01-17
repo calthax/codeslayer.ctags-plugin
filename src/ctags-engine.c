@@ -472,13 +472,25 @@ select_editor (CodeSlayer *codeslayer,
                Tag        *tag)
 {
   CodeSlayerEditor *from;
+  const gchar* from_file_path;
+  gint from_line_number;
+  
   from = codeslayer_get_active_editor (codeslayer);
+  from_file_path = codeslayer_editor_get_file_path (from);
+  from_line_number = codeslayer_editor_get_line_number (from);
 
   if (codeslayer_select_editor_by_file_path (codeslayer, tag->file_path, tag->line_number))
     {
       CodeSlayerEditor *to;
+      const gchar* to_file_path;
+      gint to_line_number;
+      
       to = codeslayer_get_active_editor (codeslayer);
-      g_signal_emit_by_name((gpointer) codeslayer, "editor-navigated", from, to);
+      to_file_path = codeslayer_editor_get_file_path (to);
+      to_line_number = codeslayer_editor_get_line_number (to);
+      
+      g_signal_emit_by_name((gpointer) codeslayer, "path-navigated", 
+                             from_file_path, from_line_number, to_file_path, to_line_number);
     }
 }
 
