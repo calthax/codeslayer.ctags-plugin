@@ -148,7 +148,7 @@ get_config_by_project (CtagsEngine       *engine,
 {
   CtagsEnginePrivate *priv;
   CtagsConfig *config;
-  GKeyFile *keyfile;
+  GKeyFile *key_file;
   gchar *source_folder;
   gchar *folder_path;
   gchar *file_path;
@@ -165,8 +165,8 @@ get_config_by_project (CtagsEngine       *engine,
       return NULL;
     }
 
-  keyfile = codeslayer_utils_get_keyfile (file_path);
-  source_folder = g_key_file_get_string (keyfile, MAIN, SOURCE_FOLDER, NULL);
+  key_file = codeslayer_utils_get_key_file (file_path);
+  source_folder = g_key_file_get_string (key_file, MAIN, SOURCE_FOLDER, NULL);
   
   config = ctags_config_new ();
   ctags_config_set_project (config, project);
@@ -175,7 +175,7 @@ get_config_by_project (CtagsEngine       *engine,
   g_free (folder_path);
   g_free (file_path);
   g_free (source_folder);
-  g_key_file_free (keyfile);
+  g_key_file_free (key_file);
   
   return config;
 }
@@ -217,20 +217,20 @@ save_config_action (CtagsEngine *engine,
   gchar *folder_path;
   gchar *file_path;
   const gchar *source_folder;
-  GKeyFile *keyfile;
+  GKeyFile *key_file;
  
   priv = CTAGS_ENGINE_GET_PRIVATE (engine);
 
   project = ctags_config_get_project (config);  
   folder_path = codeslayer_get_project_config_folder_path (priv->codeslayer, project);
   file_path = codeslayer_utils_get_file_path (folder_path, CTAGS_CONF);
-  keyfile = codeslayer_utils_get_keyfile (file_path);
+  key_file = codeslayer_utils_get_key_file (file_path);
 
   source_folder = ctags_config_get_source_folder (config);
-  g_key_file_set_string (keyfile, MAIN, SOURCE_FOLDER, source_folder);
+  g_key_file_set_string (key_file, MAIN, SOURCE_FOLDER, source_folder);
 
-  codeslayer_utils_save_keyfile (keyfile, file_path);  
-  g_key_file_free (keyfile);
+  codeslayer_utils_save_key_file (key_file, file_path);  
+  g_key_file_free (key_file);
   g_free (folder_path);
   g_free (file_path);
   
