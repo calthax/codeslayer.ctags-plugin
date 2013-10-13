@@ -268,23 +268,21 @@ start_create_tags (CtagsEngine *engine)
 {
   CtagsEnginePrivate *priv;
   FILE *file;
-  CodeSlayerGroup *group;
   GList *projects;
   GList *list;
   GString *string;
   gchar *command;
-  gchar *group_file_path;
+  gchar *profile_folder_path;
 
   priv = CTAGS_ENGINE_GET_PRIVATE (engine);
   
-  group_file_path = codeslayer_get_group_config_folder_path (priv->codeslayer);
+  profile_folder_path = codeslayer_get_profile_config_folder_path (priv->codeslayer);
   
   string = g_string_new ("cd ");
-  string = g_string_append (string, group_file_path);
+  string = g_string_append (string, profile_folder_path);
   string = g_string_append (string, ";ctags -R --fields=n");
   
-  group = codeslayer_get_group (priv->codeslayer);
-  projects = codeslayer_group_get_projects (group);
+  projects = codeslayer_get_projects (priv->codeslayer);
   list = projects;
   while (list != NULL)
     {
@@ -308,7 +306,7 @@ start_create_tags (CtagsEngine *engine)
     pclose (file);
   
   g_free (command);
-  g_free (group_file_path);
+  g_free (profile_folder_path);
   
   return FALSE;  
 }
@@ -331,11 +329,11 @@ find_tags (CodeSlayer        *codeslayer,
 	tagFileInfo info;
 	tagFile *tag_file;
 	tagEntry entry;
-	gchar *group_file_path;
+	gchar *profile_folder_path;
 	gchar *tag_file_path;
 	
-  group_file_path = codeslayer_get_group_config_folder_path (codeslayer);
-  tag_file_path = g_build_filename (group_file_path, "tags", NULL);
+  profile_folder_path = codeslayer_get_profile_config_folder_path (codeslayer);
+  tag_file_path = g_build_filename (profile_folder_path, "tags", NULL);
 	tag_file = tagsOpen (tag_file_path, &info);
 
 	if (tag_file == NULL)
@@ -359,7 +357,7 @@ find_tags (CodeSlayer        *codeslayer,
     
   tagsClose (tag_file);
   
-  g_free (group_file_path);
+  g_free (profile_folder_path);
   g_free (tag_file_path);
   
   return results;
