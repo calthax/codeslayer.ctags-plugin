@@ -46,8 +46,8 @@ static void project_properties_saved_action   (CtagsEngine        *engine,
 static void save_config_action                (CtagsEngine        *engine,
                                                CtagsConfig        *config);
 static void find_tag_action                   (CodeSlayer         *codeslayer);
-static void editor_saved_action               (CtagsEngine        *engine, 
-                                               CodeSlayerEditor   *editor);
+static void document_saved_action             (CtagsEngine        *engine, 
+                                               CodeSlayerDocument *document);
 static gboolean start_create_tags             (CtagsEngine        *engine);
 static void finish_create_tags                (CtagsEngine        *engine);
 static void execute_create_tags               (CtagsEngine        *engine);
@@ -55,13 +55,13 @@ static void execute_create_tags               (CtagsEngine        *engine);
 static GList *find_tags                       (CodeSlayer         *codeslayer, 
                                                const char *const   name, 
                                                const int           options);
-static gboolean search_active_editor          (CodeSlayer         *codeslayer, 
-                                               CodeSlayerEditor   *editor, 
+static gboolean search_active_document        (CodeSlayer         *codeslayer, 
+                                               CodeSlayerDocument *document, 
                                                GList              *tags);
 static gboolean search_projects               (CodeSlayer         *codeslayer, 
                                                GList              *tags, 
                                                gboolean            search_headers);
-static void select_editor                     (CodeSlayer         *codeslayer, 
+static void select_document                   (CodeSlayer         *codeslayer, 
                                                Tag                *tag);                                                              
                                                    
 #define CTAGS_ENGINE_GET_PRIVATE(obj) \
@@ -133,8 +133,8 @@ ctags_engine_new (CodeSlayer *codeslayer,
   priv->properties_saved_id = g_signal_connect_swapped (G_OBJECT (codeslayer), "project-properties-saved",
                                                         G_CALLBACK (project_properties_saved_action), engine);
 
-  priv->saved_handler_id = g_signal_connect_swapped (G_OBJECT (codeslayer), "editor-saved", 
-                                                     G_CALLBACK (editor_saved_action), engine);
+  priv->saved_handler_id = g_signal_connect_swapped (G_OBJECT (codeslayer), "document-saved", 
+                                                     G_CALLBACK (document_saved_action), engine);
 
   g_signal_connect_swapped (G_OBJECT (project_properties), "save-config",
                             G_CALLBACK (save_config_action), engine);
@@ -238,15 +238,15 @@ save_config_action (CtagsEngine *engine,
 }
 
 static void 
-editor_saved_action (CtagsEngine      *engine, 
-                     CodeSlayerEditor *editor) 
+document_saved_action (CtagsEngine        *engine, 
+                       CodeSlayerDocument *document) 
 {
   execute_create_tags (engine);
 }
 
 /*
  * wait a second before we regenerate the tag file in case 
- * we are saving multiple editors at once.
+ * we are saving multiple documents at once.
  */
 static void
 execute_create_tags (CtagsEngine *engine) 
@@ -366,7 +366,8 @@ find_tags (CodeSlayer        *codeslayer,
 static void 
 find_tag_action (CodeSlayer *codeslayer)
 {
-  CodeSlayerEditor *editor;
+  CodeSlayerDocument *document;
+  GtkSourceView *source_view;
   GtkTextBuffer *buffer;
   GList *tags;
   GList *tmp;
@@ -377,12 +378,13 @@ find_tag_action (CodeSlayer *codeslayer)
 
   GtkTextIter start, end;
 
-  editor = codeslayer_get_active_editor (codeslayer);
+  document = codeslayer_get_active_document (codeslayer);
   
-  if (editor == NULL)
+  if (document == NULL)
     return;
   
-  buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (editor));
+  source_view = codeslayer_document_get_source_view (document);
+  buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (source_view));
 
   insert_mark = gtk_text_buffer_get_insert (buffer);    
   selection_mark = gtk_text_buffer_get_selection_bound (buffer);
@@ -401,7 +403,7 @@ find_tag_action (CodeSlayer *codeslayer)
   if (tmp != NULL)
     {
       gboolean found;
-      found = search_active_editor (codeslayer, editor, tmp);
+      found = search_active_document (codeslayer, document, tmp);
       if (!found)
         found = search_projects (codeslayer, tmp, FALSE);
       if (!found)
@@ -422,14 +424,12 @@ find_tag_action (CodeSlayer *codeslayer)
 }
 
 static gboolean
-search_active_editor (CodeSlayer       *codeslayer, 
-                      CodeSlayerEditor *editor, 
-                      GList            *tags)
+search_active_document (CodeSlayer         *codeslayer, 
+                        CodeSlayerDocument *document, 
+                        GList              *tags)
 {
-  CodeSlayerDocument *document;
 	const gchar *document_file_path;
 	
-	document = codeslayer_editor_get_document (editor);
 	document_file_path = codeslayer_document_get_file_path (document);
 
   while (tags != NULL)
@@ -437,7 +437,7 @@ search_active_editor (CodeSlayer       *codeslayer,
       Tag *tag = tags->data;
       if (g_strcmp0 (document_file_path, tag->file_path) == 0)
         {
-          select_editor (codeslayer, tag);
+          select_document (codeslayer, tag);
           return TRUE;
         }
       tags = g_list_next (tags);
@@ -456,7 +456,7 @@ search_projects (CodeSlayer *codeslayer,
       Tag *tag = tags->data;
       if (search_headers || !g_str_has_suffix (tag->file_path, ".h"))
         {
-          select_editor (codeslayer, tag);
+          select_document (codeslayer, tag);
           return TRUE;
         }
       tags = g_list_next (tags);
@@ -466,26 +466,26 @@ search_projects (CodeSlayer *codeslayer,
 }
 
 static void
-select_editor (CodeSlayer *codeslayer, 
+select_document (CodeSlayer *codeslayer, 
                Tag        *tag)
 {
-  CodeSlayerEditor *from;
+  CodeSlayerDocument *from;
   const gchar* from_file_path;
   gint from_line_number;
   
-  from = codeslayer_get_active_editor (codeslayer);
-  from_file_path = codeslayer_editor_get_file_path (from);
-  from_line_number = codeslayer_editor_get_line_number (from);
+  from = codeslayer_get_active_document (codeslayer);
+  from_file_path = codeslayer_document_get_file_path (from);
+  from_line_number = codeslayer_document_get_line_number (from);
 
-  if (codeslayer_select_editor_by_file_path (codeslayer, tag->file_path, tag->line_number))
+  if (codeslayer_select_document_by_file_path (codeslayer, tag->file_path, tag->line_number))
     {
-      CodeSlayerEditor *to;
+      CodeSlayerDocument *to;
       const gchar* to_file_path;
       gint to_line_number;
       
-      to = codeslayer_get_active_editor (codeslayer);
-      to_file_path = codeslayer_editor_get_file_path (to);
-      to_line_number = codeslayer_editor_get_line_number (to);
+      to = codeslayer_get_active_document (codeslayer);
+      to_file_path = codeslayer_document_get_file_path (to);
+      to_line_number = codeslayer_document_get_line_number (to);
       
       g_signal_emit_by_name((gpointer) codeslayer, "path-navigated", 
                              from_file_path, from_line_number, to_file_path, to_line_number);
