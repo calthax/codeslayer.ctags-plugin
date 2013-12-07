@@ -18,7 +18,7 @@
 
 #include <codeslayer/codeslayer-utils.h>
 #include "ctags-engine.h"
-#include "navigation-node.h"
+#include "ctags-path-node.h"
 #include "ctags-config.h"
 #include "ctags-project-properties.h"
 #include "readtags.h"
@@ -64,13 +64,13 @@ static gboolean search_projects               (CtagsEngine        *engine,
                                                gboolean            search_headers);
 static void select_document                   (CtagsEngine        *engine, 
                                                Tag                *tag);                                                              
-static void add_path_navigation               (CtagsEngine        *engine,
+static void previous_action                   (CtagsEngine        *engine);
+static void next_action                       (CtagsEngine        *engine);
+static void add_path                          (CtagsEngine        *engine,
                                                const gchar        *from_file_path,
                                                gint                from_line_number,
                                                const gchar        *to_file_path,
                                                gint                to_line_number);
-static void previous_action                   (CtagsEngine        *engine);
-static void next_action                       (CtagsEngine        *engine);
 static void clear_path                        (CtagsEngine        *engine);
                                                    
 #define CTAGS_ENGINE_GET_PRIVATE(obj) \
@@ -518,18 +518,18 @@ select_document (CtagsEngine *engine,
       to_file_path = codeslayer_document_get_file_path (to);
       to_line_number = codeslayer_document_get_line_number (to);
       
-      add_path_navigation (engine, from_file_path, from_line_number, to_file_path, to_line_number);
+      add_path (engine, from_file_path, from_line_number, to_file_path, to_line_number);
     }
 }
 
-static NavigationNode*
+static CtagsPathNode*
 create_node (const gchar *file_path,
              gint         line_number)
 {
-  NavigationNode *node;
-  node = navigation_node_new ();
-  navigation_node_set_file_path (node, file_path); 
-  navigation_node_set_line_number (node, line_number); 
+  CtagsPathNode *node;
+  node = ctags_path_node_new ();
+  ctags_path_node_set_file_path (node, file_path); 
+  ctags_path_node_set_line_number (node, line_number); 
   return node;
 }
 
@@ -544,7 +544,7 @@ clear_forward_positions (CtagsEngine *engine)
   
   while (priv->position < length - 1)
     {
-      NavigationNode *node = g_list_nth_data (priv->path, length - 1);
+      CtagsPathNode *node = g_list_nth_data (priv->path, length - 1);
       priv->path = g_list_remove (priv->path, node);
       g_object_unref (node);
       length = g_list_length (priv->path);
@@ -552,11 +552,11 @@ clear_forward_positions (CtagsEngine *engine)
 }
 
 static void
-add_path_navigation (CtagsEngine *engine,
-                     const gchar *from_file_path,
-                     gint         from_line_number,
-                     const gchar *to_file_path,
-                     gint         to_line_number)
+add_path (CtagsEngine *engine,
+          const gchar *from_file_path,
+          gint         from_line_number,
+          const gchar *to_file_path,
+          gint         to_line_number)
 {
   CtagsEnginePrivate *priv;
   priv = CTAGS_ENGINE_GET_PRIVATE (engine);
@@ -568,15 +568,15 @@ add_path_navigation (CtagsEngine *engine,
     }
   else
     {
-      NavigationNode *curr_node;
-      NavigationNode *from_node;
+      CtagsPathNode *curr_node;
+      CtagsPathNode *from_node;
     
       clear_forward_positions (engine);
       
       curr_node = g_list_nth_data (priv->path, priv->position);      
       from_node = create_node (from_file_path, from_line_number);
       
-      if (!navigation_node_equals (curr_node, from_node))
+      if (!ctags_path_node_equals (curr_node, from_node))
         {
           priv->path = g_list_append (priv->path, from_node);
           priv->position = g_list_length (priv->path) - 1;
@@ -592,7 +592,7 @@ add_path_navigation (CtagsEngine *engine,
   
   while (g_list_length (priv->path) > 25)
     {
-      NavigationNode *first_node;
+      CtagsPathNode *first_node;
       first_node = g_list_nth_data (priv->path, 0);
       priv->path = g_list_remove (priv->path, first_node);
       priv->position = g_list_length (priv->path) - 1;
@@ -603,7 +603,7 @@ static void
 previous_action (CtagsEngine *engine)
 {
   CtagsEnginePrivate *priv;
-  NavigationNode *node;
+  CtagsPathNode *node;
   const gchar *file_path;
   gint line_number;
   
@@ -616,8 +616,8 @@ previous_action (CtagsEngine *engine)
   
   node = g_list_nth_data (priv->path, priv->position);
   
-  file_path = navigation_node_get_file_path (node);
-  line_number = navigation_node_get_line_number (node);
+  file_path = ctags_path_node_get_file_path (node);
+  line_number = ctags_path_node_get_line_number (node);
   
   codeslayer_select_document_by_file_path (priv->codeslayer, file_path, line_number);
 }
@@ -626,7 +626,7 @@ static void
 next_action (CtagsEngine *engine)
 {
   CtagsEnginePrivate *priv;
-  NavigationNode *node;
+  CtagsPathNode *node;
   const gchar *file_path;
   gint line_number;
   gint length;
@@ -642,8 +642,8 @@ next_action (CtagsEngine *engine)
   
   node = g_list_nth_data (priv->path, priv->position);
   
-  file_path = navigation_node_get_file_path (node);
-  line_number = navigation_node_get_line_number (node);
+  file_path = ctags_path_node_get_file_path (node);
+  line_number = ctags_path_node_get_line_number (node);
   
   if (!codeslayer_select_document_by_file_path (priv->codeslayer, file_path, line_number))
     {

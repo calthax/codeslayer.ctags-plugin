@@ -10,8 +10,8 @@ libctagscodeslayerplugin_la_SOURCES = \
     ctags-engine.h \
     ctags-menu.c \
     ctags-menu.h \
-    navigation-node.h \
-    navigation-node.c \
+    ctags-path-node.h \
+    ctags-path-node.c \
     readtags.c \
     readtags.h
 
