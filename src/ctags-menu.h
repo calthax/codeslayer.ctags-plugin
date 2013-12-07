@@ -42,6 +42,8 @@ struct _CtagsMenuClass
   GtkMenuItemClass parent_class;
 
   void (*find_tag) (CtagsMenu *menu);
+  void (*previous) (CtagsMenu *menu);
+  void (*next) (CtagsMenu *menu);
 };
 
 GType ctags_menu_get_type (void) G_GNUC_CONST;

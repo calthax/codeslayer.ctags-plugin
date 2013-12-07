@@ -99,6 +99,8 @@ am_libctagscodeslayerplugin_la_OBJECTS =  \
 	libctagscodeslayerplugin_la-ctags-project-properties.lo \
 	libctagscodeslayerplugin_la-ctags-engine.lo \
 	libctagscodeslayerplugin_la-ctags-menu.lo \
+	libctagscodeslayerplugin_la-navigation-node.lo \
+	libctagscodeslayerplugin_la-navigation-engine.lo \
 	libctagscodeslayerplugin_la-readtags.lo
 libctagscodeslayerplugin_la_OBJECTS =  \
 	$(am_libctagscodeslayerplugin_la_OBJECTS)
@@ -273,6 +275,10 @@ libctagscodeslayerplugin_la_SOURCES = \
     ctags-engine.h \
     ctags-menu.c \
     ctags-menu.h \
+    navigation-node.h \
+    navigation-node.c \
+    navigation-engine.h \
+    navigation-engine.c \
     readtags.c \
     readtags.h
 
@@ -357,6 +363,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libctagscodeslayerplugin_la-ctags-menu.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libctagscodeslayerplugin_la-ctags-plugin.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libctagscodeslayerplugin_la-ctags-project-properties.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libctagscodeslayerplugin_la-navigation-engine.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libctagscodeslayerplugin_la-navigation-node.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libctagscodeslayerplugin_la-readtags.Plo@am__quote@
 
 .c.o:
@@ -414,6 +422,20 @@ libctagscodeslayerplugin_la-ctags-menu.lo: ctags-menu.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='ctags-menu.c' object='libctagscodeslayerplugin_la-ctags-menu.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libctagscodeslayerplugin_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libctagscodeslayerplugin_la-ctags-menu.lo `test -f 'ctags-menu.c' || echo '$(srcdir)/'`ctags-menu.c
+
+libctagscodeslayerplugin_la-navigation-node.lo: navigation-node.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libctagscodeslayerplugin_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libctagscodeslayerplugin_la-navigation-node.lo -MD -MP -MF $(DEPDIR)/libctagscodeslayerplugin_la-navigation-node.Tpo -c -o libctagscodeslayerplugin_la-navigation-node.lo `test -f 'navigation-node.c' || echo '$(srcdir)/'`navigation-node.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libctagscodeslayerplugin_la-navigation-node.Tpo $(DEPDIR)/libctagscodeslayerplugin_la-navigation-node.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='navigation-node.c' object='libctagscodeslayerplugin_la-navigation-node.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libctagscodeslayerplugin_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libctagscodeslayerplugin_la-navigation-node.lo `test -f 'navigation-node.c' || echo '$(srcdir)/'`navigation-node.c
+
+libctagscodeslayerplugin_la-navigation-engine.lo: navigation-engine.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libctagscodeslayerplugin_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libctagscodeslayerplugin_la-navigation-engine.lo -MD -MP -MF $(DEPDIR)/libctagscodeslayerplugin_la-navigation-engine.Tpo -c -o libctagscodeslayerplugin_la-navigation-engine.lo `test -f 'navigation-engine.c' || echo '$(srcdir)/'`navigation-engine.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libctagscodeslayerplugin_la-navigation-engine.Tpo $(DEPDIR)/libctagscodeslayerplugin_la-navigation-engine.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='navigation-engine.c' object='libctagscodeslayerplugin_la-navigation-engine.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libctagscodeslayerplugin_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libctagscodeslayerplugin_la-navigation-engine.lo `test -f 'navigation-engine.c' || echo '$(srcdir)/'`navigation-engine.c
 
 libctagscodeslayerplugin_la-readtags.lo: readtags.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libctagscodeslayerplugin_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libctagscodeslayerplugin_la-readtags.lo -MD -MP -MF $(DEPDIR)/libctagscodeslayerplugin_la-readtags.Tpo -c -o libctagscodeslayerplugin_la-readtags.lo `test -f 'readtags.c' || echo '$(srcdir)/'`readtags.c
