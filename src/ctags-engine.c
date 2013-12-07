@@ -18,6 +18,7 @@
 
 #include <codeslayer/codeslayer-utils.h>
 #include "ctags-engine.h"
+#include "navigation-node.h"
 #include "ctags-config.h"
 #include "ctags-project-properties.h"
 #include "readtags.h"
@@ -45,24 +46,32 @@ static void project_properties_saved_action   (CtagsEngine        *engine,
                                                CodeSlayerProject  *project);                                                                        
 static void save_config_action                (CtagsEngine        *engine,
                                                CtagsConfig        *config);
-static void find_tag_action                   (CodeSlayer         *codeslayer);
+static void find_tag_action                   (CtagsEngine        *engine);
 static void document_saved_action             (CtagsEngine        *engine, 
                                                CodeSlayerDocument *document);
 static gboolean start_create_tags             (CtagsEngine        *engine);
 static void finish_create_tags                (CtagsEngine        *engine);
 static void execute_create_tags               (CtagsEngine        *engine);
                                                               
-static GList *find_tags                       (CodeSlayer         *codeslayer, 
+static GList *find_tags                       (CodeSlayer        *codeslayer, 
                                                const char *const   name, 
                                                const int           options);
-static gboolean search_active_document        (CodeSlayer         *codeslayer, 
+static gboolean search_active_document        (CtagsEngine        *engine, 
                                                CodeSlayerDocument *document, 
                                                GList              *tags);
-static gboolean search_projects               (CodeSlayer         *codeslayer, 
+static gboolean search_projects               (CtagsEngine        *engine, 
                                                GList              *tags, 
                                                gboolean            search_headers);
-static void select_document                   (CodeSlayer         *codeslayer, 
+static void select_document                   (CtagsEngine        *engine, 
                                                Tag                *tag);                                                              
+static void add_path_navigation               (CtagsEngine        *engine,
+                                               const gchar        *from_file_path,
+                                               gint                from_line_number,
+                                               const gchar        *to_file_path,
+                                               gint                to_line_number);
+static void previous_action                   (CtagsEngine        *engine);
+static void next_action                       (CtagsEngine        *engine);
+static void clear_path                        (CtagsEngine        *engine);
                                                    
 #define CTAGS_ENGINE_GET_PRIVATE(obj) \
   (G_TYPE_INSTANCE_GET_PRIVATE ((obj), CTAGS_ENGINE_TYPE, CtagsEnginePrivate))
@@ -78,6 +87,8 @@ struct _CtagsEnginePrivate
   gulong      properties_saved_id;
   gulong      saved_handler_id;
   guint       event_source_id;
+  GList      *path;
+  gint        position;
 };
 
 G_DEFINE_TYPE (CtagsEngine, ctags_engine, G_TYPE_OBJECT)
@@ -93,6 +104,9 @@ ctags_engine_class_init (CtagsEngineClass *klass)
 static void
 ctags_engine_init (CtagsEngine *engine) 
 {
+  CtagsEnginePrivate *priv;
+  priv = CTAGS_ENGINE_GET_PRIVATE (engine);
+  priv->path = NULL;
 }
 
 static void
@@ -100,6 +114,11 @@ ctags_engine_finalize (CtagsEngine *engine)
 {
   CtagsEnginePrivate *priv;
   priv = CTAGS_ENGINE_GET_PRIVATE (engine);
+    
+  g_list_foreach (priv->path, (GFunc) g_object_unref, NULL);
+  
+  if (priv->path != NULL)
+    g_list_free (priv->path);
     
   g_signal_handler_disconnect (priv->codeslayer, priv->properties_opened_id);
   g_signal_handler_disconnect (priv->codeslayer, priv->properties_saved_id);
@@ -125,7 +144,13 @@ ctags_engine_new (CodeSlayer *codeslayer,
   priv->event_source_id = 0;
   
   g_signal_connect_swapped (G_OBJECT (menu), "find-tag",
-                            G_CALLBACK (find_tag_action), codeslayer);
+                            G_CALLBACK (find_tag_action), engine);
+
+  g_signal_connect_swapped (G_OBJECT (menu), "previous", 
+                            G_CALLBACK (previous_action), engine);
+  
+  g_signal_connect_swapped (G_OBJECT (menu), "next", 
+                            G_CALLBACK (next_action), engine);
 
   priv->properties_opened_id =  g_signal_connect_swapped (G_OBJECT (codeslayer), "project-properties-opened",
                                                           G_CALLBACK (project_properties_opened_action), engine);
@@ -364,8 +389,9 @@ find_tags (CodeSlayer        *codeslayer,
 }
 
 static void 
-find_tag_action (CodeSlayer *codeslayer)
+find_tag_action (CtagsEngine *engine)
 {
+  CtagsEnginePrivate *priv;
   CodeSlayerDocument *document;
   GtkSourceView *source_view;
   GtkTextBuffer *buffer;
@@ -378,7 +404,9 @@ find_tag_action (CodeSlayer *codeslayer)
 
   GtkTextIter start, end;
 
-  document = codeslayer_get_active_document (codeslayer);
+  priv = CTAGS_ENGINE_GET_PRIVATE (engine);
+
+  document = codeslayer_get_active_document (priv->codeslayer);
   
   if (document == NULL)
     return;
@@ -397,17 +425,17 @@ find_tag_action (CodeSlayer *codeslayer)
   if (text != NULL)
     g_strstrip (text);
   
-  tags = find_tags (codeslayer, text, 0);
+  tags = find_tags (priv->codeslayer, text, 0);
   tmp = tags;
   
   if (tmp != NULL)
     {
       gboolean found;
-      found = search_active_document (codeslayer, document, tmp);
+      found = search_active_document (engine, document, tmp);
       if (!found)
-        found = search_projects (codeslayer, tmp, FALSE);
+        found = search_projects (engine, tmp, FALSE);
       if (!found)
-        search_projects (codeslayer, tmp, TRUE);
+        search_projects (engine, tmp, TRUE);
   
       while (tmp != NULL)
         {
@@ -424,7 +452,7 @@ find_tag_action (CodeSlayer *codeslayer)
 }
 
 static gboolean
-search_active_document (CodeSlayer         *codeslayer, 
+search_active_document (CtagsEngine        *engine, 
                         CodeSlayerDocument *document, 
                         GList              *tags)
 {
@@ -437,7 +465,7 @@ search_active_document (CodeSlayer         *codeslayer,
       Tag *tag = tags->data;
       if (g_strcmp0 (document_file_path, tag->file_path) == 0)
         {
-          select_document (codeslayer, tag);
+          select_document (engine, tag);
           return TRUE;
         }
       tags = g_list_next (tags);
@@ -447,16 +475,16 @@ search_active_document (CodeSlayer         *codeslayer,
 }
 
 static gboolean
-search_projects (CodeSlayer *codeslayer, 
-                 GList      *tags, 
-                 gboolean    search_headers)
+search_projects (CtagsEngine *engine, 
+                 GList       *tags, 
+                 gboolean     search_headers)
 {
   while (tags != NULL)
     {
       Tag *tag = tags->data;
       if (search_headers || !g_str_has_suffix (tag->file_path, ".h"))
         {
-          select_document (codeslayer, tag);
+          select_document (engine, tag);
           return TRUE;
         }
       tags = g_list_next (tags);
@@ -466,29 +494,170 @@ search_projects (CodeSlayer *codeslayer,
 }
 
 static void
-select_document (CodeSlayer *codeslayer, 
-               Tag        *tag)
+select_document (CtagsEngine *engine, 
+                 Tag         *tag)
 {
+  CtagsEnginePrivate *priv;
   CodeSlayerDocument *from;
   const gchar* from_file_path;
   gint from_line_number;
   
-  from = codeslayer_get_active_document (codeslayer);
+  priv = CTAGS_ENGINE_GET_PRIVATE (engine);
+  
+  from = codeslayer_get_active_document (priv->codeslayer);
   from_file_path = codeslayer_document_get_file_path (from);
   from_line_number = codeslayer_document_get_line_number (from);
 
-  if (codeslayer_select_document_by_file_path (codeslayer, tag->file_path, tag->line_number))
+  if (codeslayer_select_document_by_file_path (priv->codeslayer, tag->file_path, tag->line_number))
     {
       CodeSlayerDocument *to;
       const gchar* to_file_path;
       gint to_line_number;
       
-      to = codeslayer_get_active_document (codeslayer);
+      to = codeslayer_get_active_document (priv->codeslayer);
       to_file_path = codeslayer_document_get_file_path (to);
       to_line_number = codeslayer_document_get_line_number (to);
       
-      g_signal_emit_by_name((gpointer) codeslayer, "path-navigated", 
-                             from_file_path, from_line_number, to_file_path, to_line_number);
+      add_path_navigation (engine, from_file_path, from_line_number, to_file_path, to_line_number);
     }
 }
 
+static NavigationNode*
+create_node (const gchar *file_path,
+             gint         line_number)
+{
+  NavigationNode *node;
+  node = navigation_node_new ();
+  navigation_node_set_file_path (node, file_path); 
+  navigation_node_set_line_number (node, line_number); 
+  return node;
+}
+
+static void
+clear_forward_positions (CtagsEngine *engine)
+{
+  CtagsEnginePrivate *priv;
+  gint length;
+
+  priv = CTAGS_ENGINE_GET_PRIVATE (engine);
+  length = g_list_length (priv->path);
+  
+  while (priv->position < length - 1)
+    {
+      NavigationNode *node = g_list_nth_data (priv->path, length - 1);
+      priv->path = g_list_remove (priv->path, node);
+      g_object_unref (node);
+      length = g_list_length (priv->path);
+    }
+}
+
+static void
+add_path_navigation (CtagsEngine *engine,
+                     const gchar *from_file_path,
+                     gint         from_line_number,
+                     const gchar *to_file_path,
+                     gint         to_line_number)
+{
+  CtagsEnginePrivate *priv;
+  priv = CTAGS_ENGINE_GET_PRIVATE (engine);
+  
+  if (priv->path == NULL)
+    {
+      priv->path = g_list_append (priv->path, create_node (from_file_path, from_line_number));
+      priv->position = 0;
+    }
+  else
+    {
+      NavigationNode *curr_node;
+      NavigationNode *from_node;
+    
+      clear_forward_positions (engine);
+      
+      curr_node = g_list_nth_data (priv->path, priv->position);      
+      from_node = create_node (from_file_path, from_line_number);
+      
+      if (!navigation_node_equals (curr_node, from_node))
+        {
+          priv->path = g_list_append (priv->path, from_node);
+          priv->position = g_list_length (priv->path) - 1;
+        }
+      else
+        {
+          g_object_unref (from_node);        
+        }
+    }
+  
+  priv->path = g_list_append (priv->path, create_node (to_file_path, to_line_number));
+  priv->position = g_list_length (priv->path) - 1;
+  
+  while (g_list_length (priv->path) > 25)
+    {
+      NavigationNode *first_node;
+      first_node = g_list_nth_data (priv->path, 0);
+      priv->path = g_list_remove (priv->path, first_node);
+      priv->position = g_list_length (priv->path) - 1;
+    }
+}
+
+static void
+previous_action (CtagsEngine *engine)
+{
+  CtagsEnginePrivate *priv;
+  NavigationNode *node;
+  const gchar *file_path;
+  gint line_number;
+  
+  priv = CTAGS_ENGINE_GET_PRIVATE (engine);
+  
+  if (priv->position <= 0)
+    return;
+  
+  priv->position = priv->position - 1;
+  
+  node = g_list_nth_data (priv->path, priv->position);
+  
+  file_path = navigation_node_get_file_path (node);
+  line_number = navigation_node_get_line_number (node);
+  
+  codeslayer_select_document_by_file_path (priv->codeslayer, file_path, line_number);
+}
+
+static void
+next_action (CtagsEngine *engine)
+{
+  CtagsEnginePrivate *priv;
+  NavigationNode *node;
+  const gchar *file_path;
+  gint line_number;
+  gint length;
+  
+  priv = CTAGS_ENGINE_GET_PRIVATE (engine);
+  
+  length = g_list_length (priv->path);
+  
+  if (priv->position >= length - 1)
+    return;
+  
+  priv->position = priv->position + 1;
+  
+  node = g_list_nth_data (priv->path, priv->position);
+  
+  file_path = navigation_node_get_file_path (node);
+  line_number = navigation_node_get_line_number (node);
+  
+  if (!codeslayer_select_document_by_file_path (priv->codeslayer, file_path, line_number))
+    {
+      clear_path (engine);    
+    }
+}
+
+static void
+clear_path (CtagsEngine *engine)
+{
+  CtagsEnginePrivate *priv;
+  priv = CTAGS_ENGINE_GET_PRIVATE (engine);
+  g_list_foreach (priv->path, (GFunc) g_object_unref, NULL);
+  g_list_free (priv->path);
+  priv->path = NULL;
+  priv->position = 0;
+}

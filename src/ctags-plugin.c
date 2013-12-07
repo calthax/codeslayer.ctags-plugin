@@ -20,7 +20,6 @@
 #include "ctags-menu.h"
 #include "ctags-project-properties.h"
 #include "ctags-engine.h"
-#include "navigation-engine.h"
 #include <gtk/gtk.h>
 #include <glib.h>
 #include <gmodule.h>
@@ -32,8 +31,6 @@ static GtkWidget *menu;
 static CtagsEngine *engine;
 static GtkWidget *project_properties;
 
-static NavigationEngine *navigation_engine;
-
 G_MODULE_EXPORT
 void activate (CodeSlayer *codeslayer)
 {
@@ -43,7 +40,6 @@ void activate (CodeSlayer *codeslayer)
 
   project_properties = ctags_project_properties_new ();
   engine = ctags_engine_new (codeslayer, menu, project_properties);
-  navigation_engine = navigation_engine_new (codeslayer, menu);
 
   codeslayer_add_to_menu_bar (codeslayer, GTK_MENU_ITEM (menu));
   codeslayer_add_to_project_properties (codeslayer, project_properties, _("Ctags"));
@@ -55,5 +51,4 @@ void deactivate (CodeSlayer *codeslayer)
   codeslayer_remove_from_menu_bar (codeslayer, GTK_MENU_ITEM (menu));
   codeslayer_remove_from_project_properties (codeslayer, project_properties);
   g_object_unref (engine);
-  g_object_unref (navigation_engine);
 }
