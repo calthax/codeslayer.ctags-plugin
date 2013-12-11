@@ -109,17 +109,17 @@ add_menu_items (CtagsMenu     *menu,
   GtkWidget *previous_item;
   GtkWidget *next_item;
 
-  find_item = codeslayer_menu_item_new_with_label (_("find tag"));
+  find_item = codeslayer_menu_item_new_with_label (_("Find Tag"));
   gtk_widget_add_accelerator (find_item, "activate", accel_group, 
                               GDK_KEY_F4, 0, GTK_ACCEL_VISIBLE);  
   gtk_menu_shell_append (GTK_MENU_SHELL (submenu), find_item);
 
-  previous_item = codeslayer_menu_item_new_with_label (_("previous"));
+  previous_item = codeslayer_menu_item_new_with_label (_("Previous"));
   gtk_widget_add_accelerator (previous_item, "activate", accel_group, 
                               GDK_KEY_Left, GDK_MOD1_MASK, GTK_ACCEL_VISIBLE); 
   gtk_menu_shell_append (GTK_MENU_SHELL (submenu), previous_item);
 
-  next_item = codeslayer_menu_item_new_with_label (_("next"));
+  next_item = codeslayer_menu_item_new_with_label (_("Next"));
   gtk_widget_add_accelerator (next_item, "activate", accel_group, 
                               GDK_KEY_Right, GDK_MOD1_MASK, GTK_ACCEL_VISIBLE);
   gtk_menu_shell_append (GTK_MENU_SHELL (submenu), next_item);
