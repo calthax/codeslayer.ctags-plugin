@@ -323,6 +323,7 @@ start_create_tags (CtagsEngine *engine)
         }
       list = g_list_next (list);
     }
+  g_list_free (projects);
 
   command = g_string_free (string, FALSE);
   file = popen (command, "r");
