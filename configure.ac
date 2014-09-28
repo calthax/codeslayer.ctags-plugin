@@ -1,5 +1,5 @@
 AC_PREREQ(2.59)
-AC_INIT([CtagsCodeSlayerPlugin], [4.3.0], [jeff.johnston.mn@gmail.com])
+AC_INIT([CtagsCodeSlayerPlugin], [4.3.1], [jeff.johnston.mn@gmail.com])
 AM_INIT_AUTOMAKE
 
 AC_ARG_ENABLE(codeslayer-dev,
